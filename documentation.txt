@@ -1,0 +1,40 @@
+Calibration:
+FIRST BYTE - START CONDITION
+    0xFx (0 -f) START Remote Message (Least significant nibble: Board Index)
+
+SECOND BYTE - COMMAND
+    0XE0 = CALIBRATE MIN
+    0X$1 = CALIBRATE CENTER
+    0XE2 = CALIBRATE MAX
+    0xE3 = START BUTTON SETTINGS followed by 8 data bytes
+            Data Byte 1 - 6: CONTROLLER_MODE (Toggle/Momentary/RADIO_GROUP
+                RADIO_GROUP only applies to Button 2 (Data Byte 3).
+                If Button 2 (Data Byte 3) is set to Radio Group all subsequent Buttons are set to RADIO_GROUP as well
+
+            7th Data byte set "Display Zero on Increment Button"
+                0x00 Do NOT display 0
+                0x01: Display Zero
+
+            8th Data byte: "Display Zero on Radio Group"
+                0x00 Do NOT display 0
+                0x01: Display Zero
+                
+    0xE4 = START CONTROLLER STATUS (active/not active) followed by 14 data bytes
+
+    0xE5 = SET BUTTON VALUES  followed by 6 data bytes
+            DataBytes 6x
+                Button Index (0x00 - 0x05)
+                Button State:
+                    0x01 - 0x04 Button Value
+                    0x0F - Don't Set Button
+
+
+
+
+
+#define CONTROLLER_MODE_TOGGLE 0
+#define CONTROLLER_MODE_MOMENTARY 1
+#define CONTROLLER_MODE_INCREMENT 2
+#define CONTROLLER_MODE_KNOB 3
+#define CONTROLLER_MODE_RADIO_GROUP 4
+

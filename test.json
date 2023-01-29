@@ -1,0 +1,35 @@
+{
+  'FULL_PATH': '/rnbo/inst/0/params/dry-wet/meta',
+  'TYPE': 's',
+  'VALUE': '{"rainpots":{"center":1,"ctl":6,"unit":1}}',
+  'ACCESS': 1,
+  'CLIPMODE': 'none',
+  'CONTENTS': {
+    'rainpots': {
+      'FULL_PATH': '/rnbo/inst/0/params/dry-wet/meta/rainpots',
+      'CONTENTS': {
+        'center': {
+          'FULL_PATH': '/rnbo/inst/0/params/dry-wet/meta/rainpots/center',
+          'TYPE': 'f',
+          'VALUE': 1.0,
+          'ACCESS': 1,
+          'CLIPMODE': 'none'
+        },
+        'ctl': {
+          'FULL_PATH': '/rnbo/inst/0/params/dry-wet/meta/rainpots/ctl',
+          'TYPE': 'f',
+          'VALUE': 6.0,
+          'ACCESS': 1,
+          'CLIPMODE': 'none'
+        },
+        'unit': {
+          'FULL_PATH': '/rnbo/inst/0/params/dry-wet/meta/rainpots/unit',
+          'TYPE': 'f',
+          'VALUE': 1.0,
+          'ACCESS': 1,
+          'CLIPMODE': 'none'
+        }
+      }
+    }
+  }
+}
