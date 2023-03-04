@@ -11,29 +11,6 @@ class Listener(ServerThread):
         self.debug = debug
         self.serial_sender = serial_sender
         ServerThread.__init__(self, port)
-    """
-    @make_method('/rnbo/inst/0/messages/out/mod-env-1', 'f')
-    def env_callback(self, path, f):
-        pass
-        # print("rmod-env-1 %f" % f[0])
-    """
-
-    @make_method('/rnbo/inst/0/messages/out/reload', 'f')
-    def load_preset(self, path, value):
-        print("RELOAD FLAG: ", path,  value)
-        if value[0] == 1:  # preset loading has started
-            if self.debug:
-                print("PRESET RELOAD ---START---")
-                print("Resetting Button Values and starting collecting")
-            self.params.reset_values_by_path()
-            self.params.set_grab_values(True)
-        if value[0] == 0:
-            if self.debug:
-                print("PRESET RELOAD ---FINISHED---")
-                print(self.params.get_values_by_path())
-            self.params.set_grab_values(False)
-            time.sleep(0.1)
-            self.serial_sender.send_button_values()
 
     @make_method('/rnbo/resp', None)
     def response(self, path, args):
@@ -52,6 +29,23 @@ class Listener(ServerThread):
 
     @make_method(None, None)
     def fallback(self, path, args):
+        # Normalized param values are sent out first, so we uae it as start flag
+        if path == '/rnbo/inst/0/params/reload-config-start/normalized':
+            if self.debug:
+                print("PRESET RELOAD ---START---")
+                print("Resetting Button Values and starting collecting")
+            self.params.reset_values_by_path()
+            self.params.set_grab_values(True)
+
+        # None Normalized param values are sent out second, so we uae it as end flag
+        if path == '/rnbo/inst/0/params/reload-config-end':
+            if self.debug:
+                print("PRESET RELOAD ---FINISHED---")
+                print(self.params.get_values_by_path())
+            self.params.set_grab_values(False)
+            time.sleep(0.1)
+            self.serial_sender.send_button_values()
+
         if self.params.get_grab_values():
             if self.debug:
                 print("fallback", path, args)
@@ -62,3 +56,4 @@ class Listener(ServerThread):
                     print("   -->Setting Value:   ", path, self.params.get_values_by_path()[path])
         elif self.debug:
             print("\t OSC Message:", path, args)
+

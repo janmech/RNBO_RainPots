@@ -11,6 +11,14 @@ class ParamConfig:
         self.presets = []
         self.grab_param_values = False
         self.debug = debug
+        self.controller_states = []
+        self.controller_states_sent = []
+        self.PICKUP_VALUE_LOCKED = 0
+        self.PICKUP_VALUE_UP = 1
+        self.PICKUP_VALUE_DOWN = 2
+        for i in range(16):
+            self.controller_states.append(self.PICKUP_VALUE_LOCKED)
+            self.controller_states_sent.append(False)
 
     def get_config(self) -> dict:
         return self.config
@@ -60,6 +68,13 @@ class ParamConfig:
         if self.debug:
             print()
         return self.config
+
+    def set_controller_state(self, pot_unit, state):
+        if self.controller_states[pot_unit] != state:
+            self.controller_states_sent[pot_unit] = False
+        self.controller_states[pot_unit] = state
+        if self.debug:
+            print("Setting Controller State: ", pot_unit, self.controller_states[pot_unit])
 
     def _parse_params(self, json_response) -> dict:
         param_path_dict = {}

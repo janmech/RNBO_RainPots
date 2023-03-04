@@ -44,6 +44,18 @@ class Sender:
                 self.serial_port.write(bytes(command_values))
                 time.sleep(0.005)
 
+    def send_pickup(self, pot_unit):
+        # if not self.param.controller_states_sent[pot_unit]:
+        command_values = []
+        start_condition = 240 + int(pot_unit)
+        command_values.append(start_condition)
+        command_values.append(230)  # 0xE6 = SIGNAL VALUE PICKUP (DECIMAL 230)
+        command_values.append(self.param.controller_states[pot_unit]) # Data Byte 1: Direction
+        self.param.controller_states_sent[pot_unit] = True
+        if self.debug:
+            print("Sending Command Value Pickup: ", command_values)
+        self.serial_port.write(bytes(command_values))
+
     @staticmethod
     def format_value(btn_index: int, raw_value: float) -> int:
         formatted_value = 0
@@ -57,13 +69,3 @@ class Sender:
                 formatted_value = round(1. / raw_value)
         formatted_value = int(formatted_value)
         return formatted_value
-
-
-"""
-    0xE5 = SET BUTTON VALUES  followed by 6 data bytes
-            DataBytes 6x
-                Button Index (0x00 - 0x05)
-                Button State:
-                    0x01 - 0x04 Button Value
-                    0x0F - Don't Set Button
-"""
