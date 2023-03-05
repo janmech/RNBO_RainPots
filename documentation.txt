@@ -28,11 +28,19 @@ SECOND BYTE - COMMAND
                     0x01 - 0x04 Button Value
                     0x0F - Don't Set Button
 
-    0x06 = SIGNAL VALUE PICKUP
+    0xE6 = METER VALUE followed by 2 data bytes
+        Data Byte 1: Meter index
+        Data Byte 2: Meter Value (0 - 255)
+
+
+------- REMOVE FROM CODE ---------
+    0xE6 = SIGNAL VALUE PICKUP
         1 Data Byte:
             0 Value Locked (no pickup needed)
             1 Value Up (Turn Knob up to pick up)
             2 Value Down (Turn Knob down to pick up)
+
+
 
 
 

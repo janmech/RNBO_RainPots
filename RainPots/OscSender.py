@@ -29,6 +29,18 @@ class Sender:
     def add_listener(self, port) -> None:
         OSC.send(self.target, '/rnbo/listeners/add', '127.0.0.1:%d' % port)
 
+    def send_pgm_control(self, cmd: str, pgm_index: int) -> None:
+        preset_name = str(pgm_index).zfill(3)
+        if cmd == 'save' and pgm_index > 0:  # Preset index 0 is our init preset: Do not overwrite
+            path = '/rnbo/inst/0/presets/save'
+        elif cmd == 'load':
+            path = '/rnbo/inst/0/presets/load'
+        else:
+            return
+        if self.debug or True:
+            print("Sending: ", path, preset_name)
+        OSC.send(self.target, path, preset_name)
+
     def send_packet(self, packet) -> None:
         rainpots_unit = packet[0] & 0x0f
         controller = packet[1]

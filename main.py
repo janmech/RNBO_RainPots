@@ -54,39 +54,58 @@ if __name__ == '__main__':
 
         while True:
             data_bytes = []
-            packet = []
+            packet_cc = []
             controller = 0
-            packet_index = -1
+            packet_index_cc = -1
             rainpots_unit = -1
-            collecting = False
+            collecting_cc = False
+            pgm_number = -1
+            pgm_cmd = ''
+            
+            collecting_pgm_change = False
             while port.inWaiting() > 0:
                 try:
                     received_byte = port.read()
                     int_value = int.from_bytes(received_byte, 'little')
-                    if 176 <= int_value <= 191:
-                        collecting = True
-                        packet_index = 0
-                        packet = [0, 0, 0, 0]
+                    if 176 <= int_value <= 191:  # B0 - BF (Control Change)
+                        collecting_cc = True
+                        packet_index_cc = 0
+                        packet_cc = [0, 0, 0, 0]
                         controller = -1
-                        # rainpots_unit = int_value & 0x0f
-                        packet[packet_index] = int_value
-                        # data_bytes = [0, 0]
-                    elif collecting:
-                        packet_index = packet_index + 1
-                        if packet_index == 1:
-                            packet[1] = int_value
-                        elif 2 <= packet_index <= 3:
-                            packet[packet_index] = int_value
-                    if packet_index == 3:
-                        osc_sender.send_packet(packet)
+                        packet_cc[packet_index_cc] = int_value
+                    elif collecting_cc and not collecting_pgm_change:
+                        packet_index_cc = packet_index_cc + 1
+                        if packet_index_cc == 1:
+                            packet_cc[1] = int_value
+                        elif 2 <= packet_index_cc <= 3:
+                            packet_cc[packet_index_cc] = int_value
+                    if packet_index_cc == 3 and collecting_cc:
+                        osc_sender.send_packet(packet_cc)
                         rainpots_unit = -1
-                        collecting = False
+                        collecting_cc = False
 
+                    if 192 <= int_value <= 207 or int_value == 244:  # C0 - CF (Program Change) | F4 (Save Preset)
+                        collecting_pgm_change = True
+                        pgm_number = -1
+                        if int_value == 244:
+                            pgm_cmd = 'save'
+                        else:
+                            pgm_cmd = 'load'
+                    elif collecting_pgm_change and not collecting_cc:
+                        pgm_number = int_value
+                        collecting_pgm_change = False
+                        if debug:
+                            print("SENDING PGM (%s)" % pgm_cmd, pgm_number)
+                        osc_sender.send_pgm_control(pgm_cmd, pgm_number)
+                        pgm_number = -1
+                        pgm_cmd = ''
                 except Exception as err:
                     print(err)
                     traceback.print_exc()
                     rainpots_unit = -1
-                    collecting = False
+                    collecting_cc = False
+                    collecting_pgm_change = False
+                    pgm_cmd = ''
                     pass
             # Limit CPU usage, so we do nit fry on core at 100% all times
             time.sleep(0.000000001)

@@ -8,6 +8,7 @@ class Sender:
         self.param = params
         self.serial_port = serial_port
         self.debug = debug
+        self.meter_state = [0, 0]
 
     def send_button_values(self):
         button_out_states = {}
@@ -44,17 +45,22 @@ class Sender:
                 self.serial_port.write(bytes(command_values))
                 time.sleep(0.005)
 
-    def send_pickup(self, pot_unit):
-        # if not self.param.controller_states_sent[pot_unit]:
-        command_values = []
-        start_condition = 240 + int(pot_unit)
-        command_values.append(start_condition)
-        command_values.append(230)  # 0xE6 = SIGNAL VALUE PICKUP (DECIMAL 230)
-        command_values.append(self.param.controller_states[pot_unit]) # Data Byte 1: Direction
-        self.param.controller_states_sent[pot_unit] = True
-        if self.debug:
-            print("Sending Command Value Pickup: ", command_values)
-        self.serial_port.write(bytes(command_values))
+    def send_meter(self, meter_index: int, meter_value: int):
+        try:
+            if self.meter_state[meter_index] != meter_value:
+                command_values = []
+                start_condition = 240 + int(0) # Meter Module is always defined as Module 0
+                command_values.append(start_condition)
+                command_values.append(230)  # 0xE6 = METER VALUE (DECIMAL 230)
+                command_values.append(meter_index)  # Data Byte 1: Meter Index
+                command_values.append(meter_value)  # Data Byte 2: Meter Value
+                self.serial_port.write(bytes(command_values))
+                self.meter_state[meter_index] = meter_value
+        except Exception:
+            # Do nothing. We just don't want the code to break
+            pass
+
+        pass
 
     @staticmethod
     def format_value(btn_index: int, raw_value: float) -> int:
@@ -69,3 +75,18 @@ class Sender:
                 formatted_value = round(1. / raw_value)
         formatted_value = int(formatted_value)
         return formatted_value
+
+
+"""
+    def send_pickup(self, pot_unit):
+        # if not self.param.controller_states_sent[pot_unit]:
+        command_values = []
+        start_condition = 240 + int(pot_unit)
+        command_values.append(start_condition)
+        command_values.append(230)  # 0xE6 = SIGNAL VALUE PICKUP (DECIMAL 230)
+        command_values.append(self.param.controller_states[pot_unit]) # Data Byte 1: Direction
+        self.param.controller_states_sent[pot_unit] = True
+        if self.debug:
+            print("Sending Command Value Pickup: ", command_values)
+        self.serial_port.write(bytes(command_values))
+"""
